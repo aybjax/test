@@ -81,6 +81,7 @@ jobs:
         with:
           name: do_status
       - name: Set the dummy variables
+        if: always()
         run: |
           test_status="none"
           do_status="none"
