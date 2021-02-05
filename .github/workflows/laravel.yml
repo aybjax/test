@@ -67,11 +67,23 @@ jobs:
         - run: |
             echo "after download"
             ls -la
-
+        - run: |
+            echo "contents:"
+            cat status_job01.txt
+        
+        - run: |
+            echo "before download"
+            ls -la
         - name: Download artifact pass_status_job02
           uses: actions/download-artifact@v2
           with:
             name: pass_status_job02
+        - run: |
+            echo "after download"
+            ls -la
+        - run: |
+            echo "contents:"
+            cat status_job02.txt
 
         - name: Set the statuses of Job 01 and Job 02 as output parameters
           id: set_outputs
