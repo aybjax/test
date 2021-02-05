@@ -35,6 +35,7 @@ jobs:
       run: vendor/bin/phpunit
     
     - name: executing remote ssh commands using password
+      if: success()
       uses: appleboy/ssh-action@master
       with:
         script: |
