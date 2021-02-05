@@ -40,8 +40,8 @@ jobs:
         script: |
           cd /var/www/test
           git pull origin main
-          rm -rf .env
-          cp .env.example .env
+          #rm -rf .env
+          #cp .env.example .env
           composer update
           #php artisan key:generate
           #php artisan cache:clear
