@@ -85,7 +85,7 @@ jobs:
           test_status=$(<test_status.txt)
           do_status=$(<do_status.txt)
       - name: send email if errors occured
-        if: ${{ test_status }} == failure || ${{ do_status }} == failure
+#         if: ${{ test_status }} == failure || ${{ do_status }} == failure
         # sending email
         uses: dawidd6/action-send-mail@v2
         with:
