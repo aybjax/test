@@ -7,27 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  # testing laravel
-  initialize-artifacts:
-    name: Initializing artifact to avoid errors
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "none" > test_status.txt
-      - name: upload the test status
-        uses: actions/upload-artifact@v2
-        with:
-          name: test_status
-          path: test_status.txt
-      - run: echo "none" > do_status.txt
-      - name: upload the test do_status
-        uses: actions/upload-artifact@v2
-        with:
-          name: do_status
-          path: do_status.txt
-
-  laravel-tests:
+  laravel-tests-deploy:
     name: Testing laravel php unit and feature
-    needs: [initialize-artifacts]
     runs-on: ubuntu-latest
     steps:
     - uses: shivammathur/setup-php@b7d1d9c9a92d8d8463ce36d7f60da34d461724f8
@@ -51,81 +32,72 @@ jobs:
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
       run: vendor/bin/phpunit
-    - name: get the status of the test
-      if: always()
-      run: echo ${{ job.status }} > test_status.txt
-    - name: upload the test status
-      if: always()
-      uses: actions/upload-artifact@v2
-      with:
-        name: test_status
-        path: test_status.txt
+#     - name: get the status of the test
+#       if: always()
+#       run: echo ${{ job.status }} > test_status.txt
+#     - name: upload the test status
+#       if: always()
+#       uses: actions/upload-artifact@v2
+#       with:
+#         name: test_status
+#         path: test_status.txt
   
   # if tests are ok => connect to digital ocean
-  connect-do:
-    needs: [initialize-artifacts, laravel-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@master
-        with:
-          script: |
-            echo "hello"
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
-      - name: get the status of the test
-        if: always()
-        run: echo ${{ job.status }} > do_status.txt
-      - name: upload the ssh status
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: do_status
-          path: do_status.txt
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        script: |
+          echo "hello"
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+#     - name: get the status of the test
+#       if: always()
+#       run: echo ${{ job.status }} > do_status.txt
+#     - name: upload the ssh status
+#       if: always()
+#       uses: actions/upload-artifact@v2
+#       with:
+#         name: do_status
+#         path: do_status.txt
   
-  # send email if failure
-  send-mail:
-    runs-on: ubuntu-latest
-    needs: [initialize-artifacts, laravel-tests, connect-do]
-    if: always()
-    steps:
-      - name: Download artifact test_status
-        uses: actions/download-artifact@v2
-        with:
-          name: test_status
-      - name: Download artifact do_status
-        uses: actions/download-artifact@v2
-        with:
-          name: do_status
-      - name: Set the dummy variables
-        if: always()
-        run: |
-          test_status="none"
-          do_status="none"
-      - name: Set the statuses into variables
-        run: |
-          test_status=$(<test_status.txt)
-          do_status=$(<do_status.txt)
-      - name: send email if errors occured
-        if: always()
-        # sending email
-        uses: dawidd6/action-send-mail@v2
-        with:
-          # mail server settings
-          server_address: smtp.gmail.com
-          server_port: 465
-          # user credentials
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          # email subject
-          subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.laravel-tests.status }}
-          # email body as text
-          body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
-          # comma-separated string, send email to
-          to: aybjax@gmail.com #,aybat93@gmail.com
-          # from email name
-          from: Portal Dimedus Github
+  # if were separate process would need this
+#     - name: Download artifact test_status
+#       uses: actions/download-artifact@v2
+#       with:
+#         name: test_status
+#     - name: Download artifact do_status
+#       uses: actions/download-artifact@v2
+#       with:
+#         name: do_status
+#     - name: Set the dummy variables
+#       if: always()
+#       run: |
+#         test_status="none"
+#         do_status="none"
+#     - name: Set the statuses into variables
+#       run: |
+#         test_status=$(<test_status.txt)
+#         do_status=$(<do_status.txt)
+    - name: send email if errors occured
+      if: always()
+      # sending email
+      uses: dawidd6/action-send-mail@v2
+      with:
+        # mail server settings
+        server_address: smtp.gmail.com
+        server_port: 465
+        # user credentials
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        # email subject
+        subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.laravel-tests-deploy.status }}
+        # email body as text
+        body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+        # comma-separated string, send email to
+        to: aybjax@gmail.com #,aybat93@gmail.com
+        # from email name
+        from: Portal Dimedus Github
 
 #     job1:
 #       runs-on: ubuntu-latest
