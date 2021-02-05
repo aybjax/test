@@ -33,28 +33,38 @@ jobs:
         DB_DATABASE: database/database.sqlite
       run: vendor/bin/phpunit
     
-#     - name: executing remote ssh commands using password
-#       if: success()
-#       uses: appleboy/ssh-action@master
-#       with:
-#         script: |
-#           echo "hello"
-#         host: ${{ secrets.SSH_HOST }}
-#         username: ${{ secrets.SSH_USERNAME }}
-#         password: ${{ secrets.SSH_PASSWORD }}
-    
-    - name: send email if errors occured
-      if: always()
-      uses: dawidd6/action-send-mail@v2
+    - name: executing remote ssh commands using password
+      if: success()
+      uses: appleboy/ssh-action@master
       with:
-        server_address: smtp.gmail.com
-        server_port: 465
-        username: ${{ secrets.EMAIL_USERNAME }}
-        password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.laravel-tests-deploy.status }}
-        body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
-        to: aybjax@gmail.com #,aybat93@gmail.com
-        from: Portal Dimedus Github
+        script: |
+          cd /var/www/test
+          rm -rf .env
+          cp .env.example .env
+          composer update
+          php artisan cache:clear
+          composer install --optimize-autoloader --no-dev
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          npm install
+          npm run prod
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+    
+#     - name: send email if errors occured
+#       if: always()
+#       uses: dawidd6/action-send-mail@v2
+#       with:
+#         server_address: smtp.gmail.com
+#         server_port: 465
+#         username: ${{ secrets.EMAIL_USERNAME }}
+#         password: ${{ secrets.EMAIL_PASSWORD }}
+#         subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.laravel-tests-deploy.status }}
+#         body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+#         to: aybjax@gmail.com #,aybat93@gmail.com
+#         from: Portal Dimedus Github
 
 #     job1:
 #       runs-on: ubuntu-latest
