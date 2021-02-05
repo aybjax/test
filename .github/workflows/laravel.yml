@@ -13,15 +13,20 @@ jobs:
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
+          script: |
+            whoami
+            echo "*/*/*//*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/**/*/*/*/*/*/*/*"
+            ls -la
+            echo "*/*/*//*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/**/*/*/*/*/*/*/*"
+            pwd
+            echo "*/*/*//*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/**/*/*/*/*/*/*/*"
+            cd /var/www/html
+            echo "*/*/*//*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/**/*/*/*/*/*/*/*"
+            ls -la
+            echo "*/*/*//*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/**/*/*/*/*/*/*/*"
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
-          script: |
-            whoami
-            ls -la
-            pwd
-            cd /var/www/html
-            ls -la
 
                         #   job1:
                         #     runs-on: ubuntu-latest
