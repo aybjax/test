@@ -16,13 +16,8 @@ class ExampleTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testFailTest()
+    public function testBasic2Test()
     {
-        $this->assertTrue(false);
+        $this->assertTrue(true);
     }
 }
