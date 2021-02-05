@@ -8,8 +8,26 @@ on:
 
 jobs:
   # testing laravel
+  initialize-artifacts:
+    name: Initializing artifact to avoid errors
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "none" > test_status.txt
+      - name: upload the test status
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_status
+          path: test_status.txt
+      - run: echo "none" > do_status.txt
+      - name: upload the test do_status
+        uses: actions/upload-artifact@v2
+        with:
+          name: do_status
+          path: do_status.txt
+
   laravel-tests:
     name: Testing laravel php unit and feature
+    needs: [initialize-artifacts]
     runs-on: ubuntu-latest
     steps:
     - uses: shivammathur/setup-php@b7d1d9c9a92d8d8463ce36d7f60da34d461724f8
@@ -45,7 +63,7 @@ jobs:
   
   # if tests are ok => connect to digital ocean
   connect-do:
-    needs: laravel-tests
+    needs: [initialize-artifacts, laravel-tests]
     runs-on: ubuntu-latest
     steps:
       - name: executing remote ssh commands using password
@@ -69,7 +87,7 @@ jobs:
   # send email if failure
   send-mail:
     runs-on: ubuntu-latest
-    needs: [laravel-tests, connect-do]
+    needs: [initialize-artifacts, laravel-tests, connect-do]
     if: always()
     steps:
       - name: Download artifact test_status
