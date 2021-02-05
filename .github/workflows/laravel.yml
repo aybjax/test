@@ -43,6 +43,7 @@ jobs:
           rm -rf .env
           cp .env.example .env
           composer update
+          php artisan key:generate
           php artisan cache:clear
           composer install --optimize-autoloader --no-dev
           php artisan config:cache
