@@ -7,56 +7,73 @@ on:
     branches: [ main ]
 
 jobs:
-  job1:
+  connect_do:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "hello";
-      - run: echo "hi";
-      - run: exit 1;
-      - run: echo ${{ job.status }} > status_job01.txt
-        if: always()
-      - if: always()
-        uses: actions/upload-artifact@v1
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
         with:
-          name: pass_status_job01
-          path: status_job01.txt
-  job2:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "ho ho ho ho";
-      - run: echo ${{ job.status }} > status_job02.txt
-        if: always()
-      - if: always()
-        uses: actions/upload-artifact@v1
-        with:
-          name: pass_status_job02
-          path: status_job02.txt
-  job3:
-    needs: [job1, job2]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact pass_status_job01
-        uses: actions/download-artifact@v1
-        with:
-          name: pass_status_job01
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            whoami
+            ls -la
+            pwd
+            cd /var/www/html
+            ls -la
 
-      - name: Download artifact pass_status_job02
-        uses: actions/download-artifact@v1
-        with:
-          name: pass_status_job02
+                        #   job1:
+                        #     runs-on: ubuntu-latest
+                        #     steps:
+                        #       - run: echo "hello";
+                        #       - run: echo "hi";
+                        #       - run: exit 1;
+                        #       - run: echo ${{ job.status }} > status_job01.txt
+                        #         if: always()
+                        #       - if: always()
+                        #         uses: actions/upload-artifact@v1
+                        #         with:
+                        #           name: pass_status_job01
+                        #           path: status_job01.txt
+                        #   job2:
+                        #     runs-on: ubuntu-latest
+                        #     steps:
+                        #       - run: echo "ho ho ho ho";
+                        #       - run: echo ${{ job.status }} > status_job02.txt
+                        #         if: always()
+                        #       - if: always()
+                        #         uses: actions/upload-artifact@v1
+                        #         with:
+                        #           name: pass_status_job02
+                        #           path: status_job02.txt
+                        #   job3:
+                        #     needs: [job1, job2]
+                        #     if: always()
+                        #     runs-on: ubuntu-latest
+                        #     steps:
+                        #       - name: Download artifact pass_status_job01
+                        #         uses: actions/download-artifact@v1
+                        #         with:
+                        #           name: pass_status_job01
 
-      - name: Set the statuses of Job 01 and Job 02 as output parameters
-        id: set_outputs
-        run: |
-          echo "::set-output name=status_job01::$(<pass_status_job01/status_job01.txt)"
-          echo "::set-output name=status_job02::$(<pass_status_job02/status_job02.txt)"
+                        #       - name: Download artifact pass_status_job02
+                        #         uses: actions/download-artifact@v1
+                        #         with:
+                        #           name: pass_status_job02
 
-      - name: Show the values of the outputs
-        run: |
-          # using the syntax steps.<step_id>.outputs.<output_name> to access the output parameters
-          echo "status_job01 = ${{ steps.set_outputs.outputs.status_job01 }}"
-          echo "status_job02 = ${{ steps.set_outputs.outputs.status_job02 }}"
+                        #       - name: Set the statuses of Job 01 and Job 02 as output parameters
+                        #         id: set_outputs
+                        #         run: |
+                        #           echo "::set-output name=status_job01::$(<pass_status_job01/status_job01.txt)"
+                        #           echo "::set-output name=status_job02::$(<pass_status_job02/status_job02.txt)"
+
+                        #       - name: Show the values of the outputs
+                        #         run: |
+                        #           # using the syntax steps.<step_id>.outputs.<output_name> to access the output parameters
+                        #           echo "status_job01 = ${{ steps.set_outputs.outputs.status_job01 }}"
+                        #           echo "status_job02 = ${{ steps.set_outputs.outputs.status_job02 }}"
 
   
 #   laravel-tests:
