@@ -7,51 +7,103 @@ on:
     branches: [ main ]
 
 jobs:
-  laravel-tests:
-
+  job1:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: shivammathur/setup-php@b7d1d9c9a92d8d8463ce36d7f60da34d461724f8
-      with:
-        php-version: '8.0'
-    - uses: actions/checkout@v2
-    - name: Copy .env
-      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-    - name: Install Dependencies
-      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-    - name: Generate key
-      run: php artisan key:generate
-    - name: Directory Permissions
-      run: chmod -R 777 storage bootstrap/cache
-    - name: Create Database
-      run: |
-        mkdir -p database
-        touch database/database.sqlite
-    - name: Execute tests (Unit and Feature tests) via PHPUnit
-      env:
-        DB_CONNECTION: sqlite
-        DB_DATABASE: database/database.sqlite
-      run: vendor/bin/phpunit
-    # send email
-  send-mail:
+      - run: echo "hello";
+      - run: echo "hi";
+      - run: exit 1;
+      - run: echo ${{ job.status }} > status_job01.txt
+        if: always()
+      - if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: pass_status_job01
+          path: status_job01.txt
+  job2:
     runs-on: ubuntu-latest
-    needs: laravel-tests
+    steps:
+      - run: echo "ho ho ho ho";
+      - run: echo ${{ job.status }} > status_job02.txt
+        if: always()
+      - if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: pass_status_job02
+          path: status_job02.txt
+  job3:
+    needs: [job1, job2]
     if: always()
+    runs-on: ubuntu-latest
     steps:
-        - uses: dawidd6/action-send-mail@v2
-          with:
-            # mail server settings
-            server_address: smtp.gmail.com
-            server_port: 465
-            # user credentials
-            username: ${{ secrets.EMAIL_USERNAME }}
-            password: ${{ secrets.EMAIL_PASSWORD }}
-            # email subject
-            subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.laravel-tests.status }}
-            # email body as text
-            body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
-            # comma-separated string, send email to
-            to: aybjax@gmail.com #,aybat93@gmail.com
-            # from email name
-            from: Portal Dimedus Github
+      - name: Download artifact pass_status_job01
+        uses: actions/download-artifact@v1
+        with:
+          name: pass_status_job01
+
+      - name: Download artifact pass_status_job02
+        uses: actions/download-artifact@v1
+        with:
+          name: pass_status_job02
+
+      - name: Set the statuses of Job 01 and Job 02 as output parameters
+        id: set_outputs
+        run: |
+          echo "::set-output name=status_job01::$(<pass_status_job01/status_job01.txt)"
+          echo "::set-output name=status_job02::$(<pass_status_job02/status_job02.txt)"
+
+      - name: Show the values of the outputs
+        run: |
+          # using the syntax steps.<step_id>.outputs.<output_name> to access the output parameters
+          echo "status_job01 = ${{ steps.set_outputs.outputs.status_job01 }}"
+          echo "status_job02 = ${{ steps.set_outputs.outputs.status_job02 }}"
+
+  
+#   laravel-tests:
+
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - uses: shivammathur/setup-php@b7d1d9c9a92d8d8463ce36d7f60da34d461724f8
+#       with:
+#         php-version: '8.0'
+#     - uses: actions/checkout@v2
+#     - name: Copy .env
+#       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+#     - name: Install Dependencies
+#       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+#     - name: Generate key
+#       run: php artisan key:generate
+#     - name: Directory Permissions
+#       run: chmod -R 777 storage bootstrap/cache
+#     - name: Create Database
+#       run: |
+#         mkdir -p database
+#         touch database/database.sqlite
+#     - name: Execute tests (Unit and Feature tests) via PHPUnit
+#       env:
+#         DB_CONNECTION: sqlite
+#         DB_DATABASE: database/database.sqlite
+#       run: vendor/bin/phpunit
+#     # send email
+#   send-mail:
+#     runs-on: ubuntu-latest
+#     needs: laravel-tests
+#     if: always()
+#     steps:
+#         - uses: dawidd6/action-send-mail@v2
+#           with:
+#             # mail server settings
+#             server_address: smtp.gmail.com
+#             server_port: 465
+#             # user credentials
+#             username: ${{ secrets.EMAIL_USERNAME }}
+#             password: ${{ secrets.EMAIL_PASSWORD }}
+#             # email subject
+#             subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.laravel-tests.status }}
+#             # email body as text
+#             body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+#             # comma-separated string, send email to
+#             to: aybjax@gmail.com #,aybat93@gmail.com
+#             # from email name
+#             from: Portal Dimedus Github
