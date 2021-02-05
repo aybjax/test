@@ -39,6 +39,7 @@ jobs:
       with:
         script: |
           cd /var/www/test
+          git pull origin main
           rm -rf .env
           cp .env.example .env
           composer update
