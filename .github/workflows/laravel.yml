@@ -28,21 +28,20 @@ jobs:
         mkdir -p database
         touch database/database.sqlite
     - name: Execute tests (Unit and Feature tests) via PHPUnit
-      continue-on-error: true
       env:
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
       run: vendor/bin/phpunit
     
-    - name: executing remote ssh commands using password
-      if: success()
-      uses: appleboy/ssh-action@master
-      with:
-        script: |
-          echo "hello"
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        password: ${{ secrets.SSH_PASSWORD }}
+#     - name: executing remote ssh commands using password
+#       if: success()
+#       uses: appleboy/ssh-action@master
+#       with:
+#         script: |
+#           echo "hello"
+#         host: ${{ secrets.SSH_HOST }}
+#         username: ${{ secrets.SSH_USERNAME }}
+#         password: ${{ secrets.SSH_PASSWORD }}
     
     - name: send email if errors occured
       if: always()
